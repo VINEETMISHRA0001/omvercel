@@ -6,18 +6,34 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ 
+    status: 'error',
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message
+  });
+});
+
 // Connect to MongoDB
-let dbConnection;
-try {
-  dbConnection = await connectDB();
-  console.log('MongoDB Connected:', dbConnection.connection.host);
-} catch (err) {
-  console.error('MongoDB connection error:', err);
-  // Don't exit in production, let the serverless function handle it
-  if (process.env.NODE_ENV !== 'production') {
-    process.exit(1);
+let isConnected = false;
+
+const initializeDB = async () => {
+  try {
+    if (!isConnected) {
+      await connectDB();
+      isConnected = true;
+    }
+  } catch (err) {
+    console.error('Database connection error:', err);
+    isConnected = false;
   }
-}
+};
+
+// Initialize database connection
+initializeDB();
 
 // Start server only in development
 if (process.env.NODE_ENV !== 'production') {
