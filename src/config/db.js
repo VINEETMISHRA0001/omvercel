@@ -13,23 +13,11 @@ const connectDB = async () => {
       await mongoose.disconnect();
     }
 
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
+    if (!process.env.MONGO_URI) {
+      throw new Error('MONGO_URI is not defined in environment variables');
     }
 
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      maxPoolSize: 10,
-      minPoolSize: 5,
-      retryWrites: true,
-      retryReads: true,
-      keepAlive: true,
-      keepAliveInitialDelay: 300000
-    });
+    const conn = await mongoose.connect(process.env.MONGO_URI);
 
     cachedConnection = conn;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
