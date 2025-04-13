@@ -58,16 +58,22 @@ export const loginUser = async (req, res) => {
     if (!isValidPassword)
       return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { 
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d'
     });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
+
     // Send token in both cookie and response body
     res.cookie('auth_token', token, {
-      httpOnly: false,
+      httpOnly: true,
       secure: false,
       sameSite: 'none',
       path: '/',
+
+      domain: isProduction ? '.vercel.app' : ".localhost",
+      partitioned: isProduction,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -81,9 +87,9 @@ export const loginUser = async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -142,9 +148,9 @@ export const registerAdmin = async (req, res) => {
   try {
     const userExists = await userModel.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         status: 'error',
-        message: 'User already exists' 
+        message: 'User already exists'
       });
     }
 
@@ -187,16 +193,16 @@ export const registerAdmin = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    res.status(201).json({ 
+    res.status(201).json({
       status: 'success',
-      message: 'Admin registration successful', 
+      message: 'Admin registration successful',
       user: rest
     });
   } catch (err) {
     console.error('Admin registration error:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: err.message 
+      message: err.message
     });
   }
 };
@@ -205,7 +211,7 @@ export const logoutUser = async (req, res) => {
   try {
     // Clear the auth token cookie
     res.clearCookie('auth_token');
-    
+
     res.status(200).json({ message: 'Logout successful' });
   } catch (err) {
     res.status(500).json({ message: err.message });
