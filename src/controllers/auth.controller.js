@@ -62,20 +62,31 @@ export const loginUser = async (req, res) => {
       expiresIn: '7d',
     });
 
-    console.log(token);
-    res.cookie('auth_token', token, {
+    // Set cookie with appropriate settings for production/development
+    const cookieOptions = {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+      secure: process.env.NODE_ENV === 'production', // Only send cookie over HTTPS in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies in production
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined // Allow subdomains in production
+    };
+
+    res.cookie('auth_token', token, cookieOptions);
 
     const { password: _, ...rest } = user._doc;
 
     res.status(200).json({
+      status: 'success',
       message: 'Login successful',
-      user: rest,
+      user: rest
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Login error:', err);
+    res.status(500).json({ 
+      status: 'error',
+      message: err.message 
+    });
   }
 };
 
