@@ -3,20 +3,8 @@ import userModel from '../models/user.model.js';
 
 export const verifyToken = async (req, res, next) => {
   try {
-    let token;
+    const token = req.cookies.auth_token;
     
-    // Check cookies first
-    const cookieToken = req.cookies.auth_token;
-    
-    // Then check Authorization header
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.split(' ')[1];
-    }
-
-    // Use cookie token if header token not found
-    token = token || cookieToken;
-
     if (!token) {
       return res.status(401).json({ 
         status: 'error',
