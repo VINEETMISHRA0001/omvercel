@@ -58,13 +58,16 @@ export const loginUser = async (req, res) => {
     if (!isValidPassword)
       return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { 
+      expiresIn: '7d'
+    });
 
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
     const { password: _, ...rest } = user._doc;
@@ -131,18 +134,10 @@ export const updateUserProfile = async (req, res) => {
 };
 
 export const registerAdmin = async (req, res) => {
-  const { username, email, password, age, phone, adminToken } = req.body;
+  const { username, email, password, age, phone } = req.body;
   const avatar = req.file;
 
   try {
-    // Verify admin token
-    if (adminToken !== process.env.ADMIN_REGISTRATION_TOKEN) {
-      return res.status(403).json({ 
-        status: 'error',
-        message: 'Invalid admin registration token' 
-      });
-    }
-
     const userExists = await userModel.findOne({ email });
     if (userExists) {
       return res.status(400).json({ 
@@ -178,7 +173,6 @@ export const registerAdmin = async (req, res) => {
     const savedAdmin = await newAdmin.save();
     const { password: _, ...rest } = savedAdmin._doc;
 
-    // Generate JWT token
     const token = jwt.sign({ id: savedAdmin._id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
