@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
+    // Close existing connection if it exists
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -11,7 +16,9 @@ const connectDB = async () => {
       maxPoolSize: 10,
       minPoolSize: 5,
       retryWrites: true,
-      retryReads: true
+      retryReads: true,
+      keepAlive: true,
+      keepAliveInitialDelay: 300000
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);

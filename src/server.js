@@ -7,10 +7,17 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
-connectDB().catch(err => {
+let dbConnection;
+try {
+  dbConnection = await connectDB();
+  console.log('MongoDB Connected:', dbConnection.connection.host);
+} catch (err) {
   console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
+  // Don't exit in production, let the serverless function handle it
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
+}
 
 // Start server only in development
 if (process.env.NODE_ENV !== 'production') {
