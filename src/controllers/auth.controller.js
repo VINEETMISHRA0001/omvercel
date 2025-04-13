@@ -62,9 +62,11 @@ export const loginUser = async (req, res) => {
       expiresIn: '7d'
     });
 
+    // Send token in both cookie and response body
     res.cookie('auth_token', token, {
-      httpOnly:false,
+      httpOnly: false,
       secure: false,
+      sameSite: 'none',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
@@ -74,7 +76,8 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       status: 'success',
       message: 'Login successful',
-      user: rest
+      user: rest,
+      token: token  // Also send token in response body
     });
   } catch (err) {
     console.error('Login error:', err);
