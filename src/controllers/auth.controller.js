@@ -62,16 +62,13 @@ export const loginUser = async (req, res) => {
       expiresIn: '7d',
     });
 
-    // Simplified cookie settings for local development
-    const cookieOptions = {
+    res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: false, // Set to false for http in localhost
+      secure: false,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      
-    };
-
-    res.cookie('auth_token', token, cookieOptions);
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     const { password: _, ...rest } = user._doc;
 
@@ -189,16 +186,13 @@ export const registerAdmin = async (req, res) => {
       expiresIn: '7d',
     });
 
-    // Use same simplified cookie settings
-    const cookieOptions = {
+    res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: false, // Set to false for http in localhost
+      secure: false,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/'
-    };
-
-    res.cookie('auth_token', token, cookieOptions);
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(201).json({ 
       status: 'success',
