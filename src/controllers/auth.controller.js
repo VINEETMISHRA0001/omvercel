@@ -62,14 +62,13 @@ export const loginUser = async (req, res) => {
       expiresIn: '7d',
     });
 
-    // Set cookie with appropriate settings for production/development
+    // Simplified cookie settings for local development
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only send cookie over HTTPS in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies in production
+      secure: false, // Set to false for http in localhost
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined // Allow subdomains in production
+      
     };
 
     res.cookie('auth_token', token, cookieOptions);
@@ -190,14 +189,13 @@ export const registerAdmin = async (req, res) => {
       expiresIn: '7d',
     });
 
-    // Set cookie with appropriate settings for production/development
+    // Use same simplified cookie settings
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only send cookie over HTTPS in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies in production
+      secure: false, // Set to false for http in localhost
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined // Allow subdomains in production
+      path: '/'
     };
 
     res.cookie('auth_token', token, cookieOptions);
