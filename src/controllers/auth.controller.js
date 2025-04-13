@@ -144,12 +144,18 @@ export const registerAdmin = async (req, res) => {
   try {
     // Verify admin token
     if (adminToken !== process.env.ADMIN_REGISTRATION_TOKEN) {
-      return res.status(403).json({ message: 'Invalid admin registration token' });
+      return res.status(403).json({ 
+        status: 'error',
+        message: 'Invalid admin registration token' 
+      });
     }
 
     const userExists = await userModel.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ 
+        status: 'error',
+        message: 'User already exists' 
+      });
     }
 
     let avatarPath = null;
@@ -184,19 +190,29 @@ export const registerAdmin = async (req, res) => {
       expiresIn: '7d',
     });
 
-    // Set cookie
-    res.cookie('auth_token', token, {
+    // Set cookie with appropriate settings for production/development
+    const cookieOptions = {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+      secure: process.env.NODE_ENV === 'production', // Only send cookie over HTTPS in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies in production
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined // Allow subdomains in production
+    };
+
+    res.cookie('auth_token', token, cookieOptions);
 
     res.status(201).json({ 
+      status: 'success',
       message: 'Admin registration successful', 
-      user: rest,
-      token 
+      user: rest
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Admin registration error:', err);
+    res.status(500).json({ 
+      status: 'error',
+      message: err.message 
+    });
   }
 };
 
