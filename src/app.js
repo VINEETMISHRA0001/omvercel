@@ -45,6 +45,9 @@ app.use(
   cors({
     origin: ['http://localhost:5173', 'https://haridwarrishikeshtourism.in', 'http://localhost:5174'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Set-Cookie']
   })
 );
 
